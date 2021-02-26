@@ -1,0 +1,12 @@
+[v-cloak] {
+  display: none;
+}
+.user .dropdown {
+  transition: all 0.3s;
+  transform: translateY(10px);
+}
+.user:hover .dropdown {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
