@@ -5,11 +5,11 @@ import React, {
   ReactNode,
   SetStateAction,
   useContext,
-  useReducer,
+  useReducer
 } from 'react';
 
-const loginURL = process.env.REACT_APP_LOGINURL || '/go/login';
-const checkURL = process.env.REACT_APP_CHECKURL || '/go/check';
+const loginURL = (import.meta.env.VITE_LOGINURL as string) || '/go/login';
+const checkURL = (import.meta.env.VITE_CHECKURL as string) || '/go/check';
 
 export type User = {
   role: number;
@@ -30,7 +30,7 @@ export interface CJson {
 const initialAuthState: AuthState = {
   user: { role: 0, name: '', token: '' },
   login: false,
-  check: false,
+  check: false
 };
 
 export type ReducerActions =
@@ -64,17 +64,21 @@ interface TJson {
 const initialSetAuthState: SetAuthState = {
   dispatch: () => {
     return true;
-  },
+  }
 };
 
-export const login = (name: string, pass: string, setAuth: Dispatch<ReducerActions>): void => {
+export const login = (
+  name: string,
+  pass: string,
+  setAuth: Dispatch<ReducerActions>
+): void => {
   fetch(loginURL, {
     method: 'POST',
     mode: 'cors',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ u: name, p: btoa(pass) }),
+    body: JSON.stringify({ u: name, p: btoa(pass) })
   })
     .then((response) => response.json())
     .then((response) => response as TJson)
@@ -85,11 +89,11 @@ export const login = (name: string, pass: string, setAuth: Dispatch<ReducerActio
           user: {
             role: jsonData.r,
             name,
-            token: jsonData.t,
+            token: jsonData.t
           },
           check: true,
-          login: true,
-        },
+          login: true
+        }
       });
     });
 };
@@ -99,9 +103,9 @@ export const check = (token: string, role: string): void => {
     method: 'POST',
     mode: 'cors',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ t: token, r: role }),
+    body: JSON.stringify({ t: token, r: role })
   })
     .then((response) => response.json())
     .then((response) => response as CJson)
@@ -144,14 +148,17 @@ const clearStorage = (): void => {
   localStorage.removeItem('user');
 };
 
-export const reducer = (authState: AuthState, action: ReducerActions): AuthState => {
+export const reducer = (
+  authState: AuthState,
+  action: ReducerActions
+): AuthState => {
   switch (action.type) {
     case 'SetAuth': {
       setStorage(action.data.user);
       return {
         user: action.data.user,
         login: action.data.login,
-        check: action.data.check,
+        check: action.data.check
       };
     }
     case 'ClearAuth': {
@@ -159,26 +166,26 @@ export const reducer = (authState: AuthState, action: ReducerActions): AuthState
       return {
         user: { role: 0, name: '', token: '' },
         login: false,
-        check: true,
+        check: true
       };
     }
     case 'SetLogin': {
       return {
         ...authState,
         login: action.data,
-        check: true,
+        check: true
       };
     }
     case 'Checked': {
       return {
         ...authState,
-        check: true,
+        check: true
       };
     }
     case 'Unchecked': {
       return {
         ...authState,
-        check: false,
+        check: false
       };
     }
     default:
@@ -186,14 +193,16 @@ export const reducer = (authState: AuthState, action: ReducerActions): AuthState
   }
 };
 
-export const AuthProvider = (properties: AuthProviderProperties): ReactElement => {
+export const AuthProvider = (
+  properties: AuthProviderProperties
+): ReactElement => {
   const { children } = properties;
 
   const user = getStorage();
   const initState: AuthState = {
     user,
     login: false,
-    check: false,
+    check: false
   };
 
   const [state, dispatch] = useReducer(reducer, initState);
@@ -210,7 +219,9 @@ export const AuthProvider = (properties: AuthProviderProperties): ReactElement =
 
   return (
     <AuthContext.Provider value={state}>
-      <SetAuthContext.Provider value={setState}>{children}</SetAuthContext.Provider>
+      <SetAuthContext.Provider value={setState}>
+        {children}
+      </SetAuthContext.Provider>
     </AuthContext.Provider>
   );
 };
@@ -228,7 +239,7 @@ export const useAuthState = (): AuthContextProperties => {
 
 export const checkStorage = (
   setChecker: Dispatch<SetStateAction<boolean>>,
-  setLogin: Dispatch<SetStateAction<boolean>>,
+  setLogin: Dispatch<SetStateAction<boolean>>
 ): void => {
   const user = getStorage();
 
@@ -236,9 +247,9 @@ export const checkStorage = (
     method: 'POST',
     mode: 'cors',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: `{ "t": "${user.token}", "r": ${user.role} }`,
+    body: `{ "t": "${user.token}", "r": ${user.role} }`
   })
     .then((response) => response.json())
     .then((response) => response as CJson)
